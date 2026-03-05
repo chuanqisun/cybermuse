@@ -35,15 +35,15 @@ function buildDefaultGrid(): StoredGrid {
   const COUNT_8 = 3;
 
   return [
-    [c(0), c(0), c(0), c(0),       t("cybermuse"), c(0),            c(0)],
-    [c(0), c(0), c(0), c(0),       t("loves"),     c(0),            c(0)],
-    [c(0), c(0), c(0), c(RHYME_A), t("romantic"),   c(POS_ADJECTIVE), c(COUNT_4)],
-    [c(0), c(0), c(0), c(RHYME_A), t("romantic"),   c(POS_ADJECTIVE), c(0, "7")],
+    [c(0), c(0), c(0), c(0), t("cybermuse"), c(0), c(0)],
+    [c(0), c(0), c(0), c(0), t("loves"), c(0), c(0)],
+    [c(0), c(0), c(0), c(RHYME_A), t("romantic"), c(POS_ADJECTIVE), c(COUNT_4)],
+    [c(0), c(0), c(0), c(RHYME_A), t("poem"), c(POS_ADJECTIVE), c(0, "7")],
     emptyRow(),
-    [c(0), c(0), c(0), c(0),       t("it"),         c(0),            c(0)],
-    [c(0), c(0), c(0), c(0),       t("sings"),      c(0),            c(0)],
-    [c(0), c(0), c(0), c(RHYME_A), t(""),           c(POS_ADJECTIVE), c(0, "5")],
-    [c(0), c(0), c(0), c(RHYME_B), t(""),           c(POS_NOUN),     c(COUNT_8)],
+    [c(0), c(0), c(0), c(0), t("it"), c(0), c(0)],
+    [c(0), c(0), c(0), c(0), t("sings"), c(0), c(0)],
+    [c(0), c(0), c(0), c(RHYME_A), t(""), c(POS_ADJECTIVE), c(0, "5")],
+    [c(0), c(0), c(0), c(RHYME_B), t(""), c(POS_NOUN), c(COUNT_8)],
   ];
 }
 
@@ -59,7 +59,7 @@ export async function initStorageBridge(grid: GridElement, header: HeaderElement
   // ---- Hydrate from stored state --------------------------------
   const [storedGrid, storedWpm, storedSettings] = await Promise.all([loadGrid(), loadWpm(), loadSettings()]);
 
-  if (storedGrid) {
+  if (storedGrid && storedGrid.length > 0) {
     grid.deserialise(storedGrid);
   } else {
     grid.deserialise(buildDefaultGrid());
