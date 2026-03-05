@@ -92,7 +92,7 @@ export class GridElement extends HTMLElement {
   private typeCellKey = "";
   private typeInput$ = new Subject<void>();
   private typeSub?: Subscription;
-  private highlightedRow = -1;
+  private highlightedRows = new Set<number>();
   private highlightedWord?: string;
   private focusedRow = -1;
   private resolvedCounts = new Map<number, number>();
@@ -187,7 +187,7 @@ export class GridElement extends HTMLElement {
       `;
     }
 
-    const isHighlighted = row === this.highlightedRow;
+    const isHighlighted = this.highlightedRows.has(row);
     const isFocused = row === this.focusedRow;
     const showSampled = isHighlighted && !isFocused && !!this.highlightedWord;
     const displayValue = showSampled ? this.highlightedWord! : cell.value;
@@ -407,7 +407,7 @@ export class GridElement extends HTMLElement {
     this.dispatchEvent(new CustomEvent("grid-change", { bubbles: true, composed: true }));
   }
 
-  highlight(index: number, word?: string) {
+  highlight(index: number | number[], word?: string) {
     // index is relative to the first non-blank row (same as GridWord.index)
     let firstNonBlank = -1;
     for (let i = 0; i < this.cells.length; i++) {
@@ -416,13 +416,19 @@ export class GridElement extends HTMLElement {
         break;
       }
     }
-    this.highlightedRow = firstNonBlank === -1 ? -1 : firstNonBlank + index;
+    this.highlightedRows.clear();
+    if (firstNonBlank !== -1) {
+      const indices = Array.isArray(index) ? index : [index];
+      for (const idx of indices) {
+        this.highlightedRows.add(firstNonBlank + idx);
+      }
+    }
     this.highlightedWord = word;
     this.renderGrid();
   }
 
   clearHighlight() {
-    this.highlightedRow = -1;
+    this.highlightedRows.clear();
     this.highlightedWord = undefined;
     this.renderGrid();
   }
@@ -561,7 +567,7 @@ export class GridElement extends HTMLElement {
     this.cells = Array.from({ length: ROWS }, () => this.createRowCells());
     this.resolvedCounts.clear();
     this.synthStatuses.clear();
-    this.highlightedRow = -1;
+    this.highlightedRows.clear();
     this.highlightedWord = undefined;
     this.renderGrid();
     this.emitChange();

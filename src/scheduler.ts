@@ -8,8 +8,13 @@ function wpmToMs(wpm: number): number {
 }
 
 export interface SchedulerCallbacks {
-  /** Called each time a word is played; also logged to console. */
-  onWord(word: string, wordIndex: number): void;
+  /**
+   * Called each time a word is played; also logged to console.
+   * For blank rows, `word` is `""`.  When consecutive blanks are
+   * combined, `blankIndices` contains the indices of **all** blank
+   * slots in the run so the caller can flash them together.
+   */
+  onWord(word: string, wordIndex: number, blankIndices?: number[]): void;
   /** Called when the cursor wraps back to the start (one full cycle). */
   onLoopEnd?(): void;
 }
@@ -130,10 +135,15 @@ export class Scheduler {
 
     const slot = words[this.cursor];
 
-    // Blank rows are silent rests — highlight but don't sample
+    // Blank rows are silent rests — combine consecutive blanks into a
+    // single tick so they produce one beat / one visual flash.
     if (slot.blank) {
-      this.callbacks.onWord("", slot.index);
-      this.cursor++;
+      const blankIndices: number[] = [slot.index];
+      while (this.cursor + blankIndices.length < words.length && words[this.cursor + blankIndices.length].blank) {
+        blankIndices.push(words[this.cursor + blankIndices.length].index);
+      }
+      this.callbacks.onWord("", slot.index, blankIndices);
+      this.cursor += blankIndices.length;
       this.scheduleTick(this.stepMs);
       return;
     }
