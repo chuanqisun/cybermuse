@@ -3,13 +3,12 @@ header-element {
   top: 0;
   z-index: 10;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  gap: 1.5ch;
   width: 100%;
-  padding: 1ch 2ch;
+  height: 4ch;
   background-color: Canvas;
-  border-bottom: 1px solid Field;
+  border-bottom: 1px solid CanvasText;
 
   .header-btn {
     cursor: pointer;
@@ -18,34 +17,45 @@ header-element {
     font-family: inherit;
     font-size: inherit;
     color: inherit;
+    padding: 0 1.5ch;
     opacity: 0.5;
 
     &:hover {
       opacity: 1;
+      background: CanvasText;
+      color: Canvas;
     }
+  }
+
+  .header-divider {
+    width: 1px;
+    align-self: stretch;
+    background: currentColor;
+    opacity: 0.3;
   }
 
   .wpm-group {
     display: flex;
     align-items: center;
-    gap: 0.5ch;
-    opacity: 0.5;
-
-    &:focus-within {
-      opacity: 1;
-    }
+    gap: 0;
   }
 
   .wpm-input {
     width: 5ch;
+    height: 100%;
     background: none;
     border: none;
-    border-bottom: 1px solid currentColor;
     color: inherit;
     font-family: inherit;
     font-size: inherit;
     text-align: center;
+    opacity: 0.5;
     -moz-appearance: textfield;
+
+    &:focus,
+    &:hover {
+      opacity: 1;
+    }
 
     &::-webkit-inner-spin-button,
     &::-webkit-outer-spin-button {
@@ -55,9 +65,8 @@ header-element {
   }
 
   .wpm-label {
-    font-size: 0.8em;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    opacity: 0.5;
+    padding-right: 1ch;
   }
 }
 
