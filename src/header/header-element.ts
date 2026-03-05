@@ -58,28 +58,17 @@ export class HeaderElement extends HTMLElement {
   private renderUI() {
     render(
       html`
-        <button class="header-btn" type="button" @click=${this.onPlayStopClick}>
-          ${this.playing ? "Stop" : "Play"}
-        </button>
-        <button class="header-btn" type="button" @click=${this.onAutoClick}>
-          Auto: ${this.autoMode ? "ON" : "OFF"}
-        </button>
+        <button class="header-btn" type="button" @click=${this.onPlayStopClick}>${this.playing ? "Stop" : "Play"}</button>
+        <button class="header-btn" type="button" @click=${this.onAutoClick}>Auto: ${this.autoMode ? "ON" : "OFF"}</button>
         <div class="wpm-group">
-          <input
-            class="wpm-input"
-            type="number"
-            min="1"
-            max="600"
-            .value=${String(this.wpm)}
-            @change=${this.onWpmChange}
-          />
+          <input class="wpm-input" type="number" min="1" max="600" .value=${String(this.wpm)} @change=${this.onWpmChange} />
           <span>wpm</span>
         </div>
         <button class="header-btn" type="button" @click=${this.onSettingsClick}>Settings</button>
         <button class="header-btn" type="button" @click=${this.onHelpClick}>Help</button>
         <button class="header-btn" type="button" @click=${this.onClearClick}>Clear</button>
       `,
-      this,
+      this
     );
   }
 
@@ -192,9 +181,7 @@ export class HeaderElement extends HTMLElement {
       if (apiKeyInput) {
         this.settings.geminiApiKey = apiKeyInput.value.trim() || undefined;
       }
-      this.dispatchEvent(
-        new CustomEvent("settings-change", { bubbles: true, composed: true, detail: { ...this.settings } }),
-      );
+      this.dispatchEvent(new CustomEvent("settings-change", { bubbles: true, composed: true, detail: { ...this.settings } }));
       dialog.close();
       dialog.remove();
       this.dialog = undefined;
@@ -218,7 +205,7 @@ export class HeaderElement extends HTMLElement {
           <button type="button" @click=${onSave}>Save</button>
         </div>
       `,
-      dialog,
+      dialog
     );
 
     document.body.appendChild(dialog);
@@ -244,10 +231,8 @@ export class HeaderElement extends HTMLElement {
 
     render(
       html`
-        <h3 class="dialog-title">Help</h3>
-
         <section class="help-section">
-          <h4>Quick Start</h4>
+          <h2>Quick Start</h2>
           <p>Header controls, from left to right:</p>
           <dl class="help-dl">
             <dt>Play / Stop</dt>
@@ -273,41 +258,36 @@ export class HeaderElement extends HTMLElement {
         </section>
 
         <section class="help-section">
-          <h4>Poem Voicing</h4>
+          <h2>Poem Voicing</h2>
+          <p>Each row in the grid is a <strong>slot</strong> that produces one spoken word. A blank row (all fields empty) acts as a silent rest.</p>
+          <h3>Syllable Stress</h3>
           <p>
-            Each row in the grid is a <strong>slot</strong> that produces one spoken word. A blank row (all fields empty) acts as a silent rest.
+            The first three columns set a stress pattern. Each cell is blank, <code>0</code> (unstressed), <code>1</code> (primary stress),
+            <code>2</code> (secondary stress), or <code>.</code> (wildcard — matches zero or more syllables of any stress). Cells are read left to right, e.g.
+            <code>1.0</code> matches words starting stressed and ending unstressed. If no words match, the constraint is dropped so every slot always produces a
+            word.
           </p>
-          <h5>Syllable Stress</h5>
+          <h3>Rhyme Groups</h3>
           <p>
-            The first three columns set a stress pattern. Each cell is blank, <code>0</code> (unstressed),
-            <code>1</code> (primary stress), <code>2</code> (secondary stress), or <code>.</code> (wildcard — matches zero or more syllables of any stress).
-            Cells are read left to right, e.g. <code>1.0</code> matches words starting stressed and ending unstressed.
-            If no words match, the constraint is dropped so every slot always produces a word.
-          </p>
-          <h5>Rhyme Groups</h5>
-          <p>
-            Assign slots to a rhyme group (<code>A</code>–<code>G</code>). All slots in the same group are constrained to rhyme with each other.
-            The first slot in each group with user-entered text anchors the rhyme key. The solver uses progressive suffix relaxation to find the
-            tightest partial rhyme when exact matches are scarce.
+            Assign slots to a rhyme group (<code>A</code>–<code>G</code>). All slots in the same group are constrained to rhyme with each other. The first slot
+            in each group with user-entered text anchors the rhyme key. The solver uses progressive suffix relaxation to find the tightest partial rhyme when
+            exact matches are scarce.
           </p>
         </section>
 
         <section class="help-section">
-          <h4>Semantic Word Selection &amp; Patterning</h4>
-          <h5>Text</h5>
+          <h3>Text</h3>
           <p>
-            When count ≤ 1 (default), the text you type is the exact word spoken (literal mode).
-            When count &gt; 1, the text becomes a <strong>semantic query</strong> — the system finds words whose meaning is similar using vector embeddings.
-            Leave text blank with count &gt; 1 to draw from the full dictionary.
+            When count ≤ 1 (default), the text you type is the exact word spoken (literal mode). When count &gt; 1, the text becomes a
+            <strong>semantic query</strong> — the system finds words whose meaning is similar using vector embeddings. Leave text blank with count &gt; 1 to
+            draw from the full dictionary.
           </p>
-          <h5>Part of Speech</h5>
+          <h3>Part of Speech</h3>
+          <p>Filter candidates to a specific part of speech (noun, verb, adjective, etc.). Applied before stress and rhyme constraints.</p>
+          <h3>Count</h3>
           <p>
-            Filter candidates to a specific part of speech (noun, verb, adjective, etc.). Applied before stress and rhyme constraints.
-          </p>
-          <h5>Count</h5>
-          <p>
-            Controls how many candidate words cycle in each slot. Default is 1 (literal). Click to cycle through 2, 4, 8,
-            or type any number. When count &gt; 1, the solver finds matching candidates ranked by semantic similarity.
+            Controls how many candidate words cycle in each slot. Default is 1 (literal). Click to cycle through 2, 4, 8, or type any number. When count &gt; 1,
+            the solver finds matching candidates ranked by semantic similarity.
           </p>
         </section>
 
@@ -315,7 +295,7 @@ export class HeaderElement extends HTMLElement {
           <button type="button" @click=${onClose}>Close</button>
         </div>
       `,
-      dialog,
+      dialog
     );
 
     document.body.appendChild(dialog);
