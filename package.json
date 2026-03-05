@@ -1,0 +1,27 @@
+{
+  "name": "cybermuse",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vite": "^8.0.0-beta.13"
+  },
+  "overrides": {
+    "vite": "^8.0.0-beta.13"
+  },
+  "dependencies": {
+    "@google/genai": "^1.44.0",
+    "eigen-db": "^5.0.0",
+    "idb-keyval": "^6.2.2",
+    "lit-html": "^3.3.2",
+    "rxjs": "^7.8.2",
+    "vitest": "^4.0.18",
+    "zod": "^4.3.6"
+  }
+}
