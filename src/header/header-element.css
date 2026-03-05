@@ -64,7 +64,8 @@ header-element {
 /* ------------------------------------------------------------------ */
 /*  Settings dialog                                                   */
 /* ------------------------------------------------------------------ */
-.settings-dialog {
+.settings-dialog,
+.help-dialog {
   &::backdrop {
     background: rgba(0, 0, 0, 0.6);
   }
@@ -114,5 +115,63 @@ header-element {
     &:hover {
       opacity: 1;
     }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Help dialog                                                       */
+/* ------------------------------------------------------------------ */
+.help-dialog {
+  max-width: 56ch;
+  max-height: 80vh;
+  overflow-y: auto;
+
+  .help-section {
+    margin-bottom: 2ch;
+  }
+
+  .help-section h4 {
+    margin: 0 0 0.5ch;
+    font-size: 1em;
+  }
+
+  .help-section h5 {
+    margin: 1ch 0 0.3ch;
+    font-size: 0.9em;
+    opacity: 0.85;
+  }
+
+  .help-section p {
+    margin: 0 0 0.8ch;
+    font-size: 0.85em;
+    line-height: 1.5;
+  }
+
+  .help-dl {
+    margin: 0 0 0.8ch;
+    font-size: 0.85em;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.3ch 1.5ch;
+  }
+
+  .help-dl dt {
+    font-weight: bold;
+    white-space: nowrap;
+  }
+
+  .help-dl dd {
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  kbd {
+    display: inline-block;
+    padding: 0 0.4ch;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 0.85em;
+    opacity: 0.8;
   }
 }

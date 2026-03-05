@@ -76,7 +76,7 @@ export class HeaderElement extends HTMLElement {
           <span>wpm</span>
         </div>
         <button class="header-btn" type="button" @click=${this.onSettingsClick}>Settings</button>
-        <button class="header-btn" type="button">Help</button>
+        <button class="header-btn" type="button" @click=${this.onHelpClick}>Help</button>
         <button class="header-btn" type="button" @click=${this.onClearClick}>Clear</button>
       `,
       this,
@@ -131,6 +131,10 @@ export class HeaderElement extends HTMLElement {
   /* ---------------------------------------------------------------- */
 
   private onAutoClick = () => {
+    if (!this.autoMode && !this.settings.geminiApiKey) {
+      this.openSettingsDialog();
+      return;
+    }
     this.autoMode = !this.autoMode;
     this.renderUI();
     const event = this.autoMode ? "agent-start" : "agent-stop";
@@ -172,6 +176,10 @@ export class HeaderElement extends HTMLElement {
     this.openSettingsDialog();
   };
 
+  private onHelpClick = () => {
+    this.openHelpDialog();
+  };
+
   private openSettingsDialog() {
     // Remove any existing dialog
     this.dialog?.remove();
@@ -208,6 +216,103 @@ export class HeaderElement extends HTMLElement {
         <div class="dialog-actions">
           <button type="button" @click=${onCancel}>Cancel</button>
           <button type="button" @click=${onSave}>Save</button>
+        </div>
+      `,
+      dialog,
+    );
+
+    document.body.appendChild(dialog);
+    this.dialog = dialog;
+    dialog.showModal();
+  }
+
+  /* ---------------------------------------------------------------- */
+  /*  Help dialog                                                      */
+  /* ---------------------------------------------------------------- */
+
+  private openHelpDialog() {
+    this.dialog?.remove();
+
+    const dialog = document.createElement("dialog");
+    dialog.className = "help-dialog";
+
+    const onClose = () => {
+      dialog.close();
+      dialog.remove();
+      this.dialog = undefined;
+    };
+
+    render(
+      html`
+        <h3 class="dialog-title">Help</h3>
+
+        <section class="help-section">
+          <h4>Quick Start</h4>
+          <p>Header controls, from left to right:</p>
+          <dl class="help-dl">
+            <dt>Play / Stop</dt>
+            <dd>Start or stop the poem loop. Each loop cycles through every row and speaks the resolved word.</dd>
+            <dt>Auto</dt>
+            <dd>Toggle AI composition mode. The AI agent fills and edits slots automatically. Requires a Gemini API key (see Settings).</dd>
+            <dt>WPM</dt>
+            <dd>Words per minute — controls playback speed (1–600).</dd>
+            <dt>Settings</dt>
+            <dd>Configure your Gemini API key. Only needed for AI mode.</dd>
+            <dt>Help</dt>
+            <dd>Opens this dialog.</dd>
+            <dt>Clear</dt>
+            <dd>Reset the entire grid to a blank state.</dd>
+          </dl>
+          <p><strong>Keyboard shortcuts</strong></p>
+          <dl class="help-dl">
+            <dt><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Enter</kbd></dt>
+            <dd>Start playback or re‑evaluate patterns while playing (update).</dd>
+            <dt><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>Enter</kbd></dt>
+            <dd>Stop playback.</dd>
+          </dl>
+        </section>
+
+        <section class="help-section">
+          <h4>Poem Voicing</h4>
+          <p>
+            Each row in the grid is a <strong>slot</strong> that produces one spoken word. A blank row (all fields empty) acts as a silent rest.
+          </p>
+          <h5>Syllable Stress</h5>
+          <p>
+            The first three columns set a stress pattern. Each cell is blank, <code>0</code> (unstressed),
+            <code>1</code> (primary stress), <code>2</code> (secondary stress), or <code>.</code> (wildcard — matches zero or more syllables of any stress).
+            Cells are read left to right, e.g. <code>1.0</code> matches words starting stressed and ending unstressed.
+            If no words match, the constraint is dropped so every slot always produces a word.
+          </p>
+          <h5>Rhyme Groups</h5>
+          <p>
+            Assign slots to a rhyme group (<code>A</code>–<code>G</code>). All slots in the same group are constrained to rhyme with each other.
+            The first slot in each group with user-entered text anchors the rhyme key. The solver uses progressive suffix relaxation to find the
+            tightest partial rhyme when exact matches are scarce.
+          </p>
+        </section>
+
+        <section class="help-section">
+          <h4>Semantic Word Selection &amp; Patterning</h4>
+          <h5>Text</h5>
+          <p>
+            When count ≤ 1 (default), the text you type is the exact word spoken (literal mode).
+            When count &gt; 1, the text becomes a <strong>semantic query</strong> — the system finds words whose meaning is similar using vector embeddings.
+            Leave text blank with count &gt; 1 to draw from the full dictionary.
+          </p>
+          <h5>Part of Speech</h5>
+          <p>
+            Filter candidates to a specific part of speech (noun, verb, adjective, etc.). Applied before stress and rhyme constraints.
+          </p>
+          <h5>Count</h5>
+          <p>
+            Controls how many candidate words cycle in each slot. Default is 1 (literal). Click to cycle through 2, 4, 8,
+            or type any number. When count &gt; 1, the solver finds matching candidates ranked by semantic similarity.
+          </p>
+        </section>
+
+        <div class="dialog-actions">
+          <button type="button" @click=${onClose}>Close</button>
         </div>
       `,
       dialog,
