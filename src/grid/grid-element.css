@@ -15,6 +15,8 @@ grid-element {
     outline-offset: -3px;
   }
 
+  padding: 1ch;
+
   button {
     cursor: pointer;
     color: var(--rhyme-color, currentColor);

@@ -5,11 +5,26 @@ header-element {
   display: flex;
   font-size: 12px;
   align-items: stretch;
-  justify-content: center;
+  justify-content: space-between;
   width: 100%;
-  height: 4ch;
+  min-height: 4ch;
   background-color: Canvas;
-  border-bottom: 1px solid color-mix(in srgb, CanvasText 30%, Canvas 70%);
+  --border-color: color-mix(in srgb, CanvasText 30%, Canvas 70%);
+  border-bottom: 1px solid var(--border-color);
+
+  .header-title {
+    display: flex;
+    align-items: center;
+    padding: 0 1.5ch;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
 
   .header-btn {
     cursor: pointer;
@@ -20,8 +35,15 @@ header-element {
     color: inherit;
     padding: 0 1.5ch;
     opacity: 0.5;
+    white-space: nowrap;
 
     &:hover {
+      opacity: 1;
+      background: CanvasText;
+      color: Canvas;
+    }
+
+    &.active {
       opacity: 1;
       background: CanvasText;
       color: Canvas;
@@ -32,12 +54,13 @@ header-element {
     width: 1px;
     align-self: stretch;
     background: currentColor;
-    color: color-mix(in srgb, CanvasText 30%, Canvas 70%);
+    color: var(--border-color);
   }
 
   .wpm-group {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0;
   }
 
@@ -50,8 +73,6 @@ header-element {
     font-family: inherit;
     font-size: inherit;
     text-align: center;
-    opacity: 0.5;
-    -moz-appearance: textfield;
 
     &:focus,
     &:hover {
@@ -71,13 +92,38 @@ header-element {
   }
 }
 
-/* ------------------------------------------------------------------ */
-/*  Settings dialog                                                   */
-/* ------------------------------------------------------------------ */
+@media (max-width: 600px) {
+  header-element {
+    flex-direction: column;
+    align-items: stretch;
+
+    .header-title {
+      justify-content: center;
+      padding-block: 0.5ch;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 3ch 3ch;
+      .header-divider {
+        display: none;
+      }
+
+      .header-btn:last-of-type {
+        position: fixed;
+        top: 0;
+        right: 0;
+        padding-block: 0.5ch;
+      }
+    }
+  }
+}
+
 .settings-dialog {
   .dialog-title {
     margin: 0 0 1.5ch;
-    font-size: 1.1em;
   }
 
   .field {

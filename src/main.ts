@@ -95,6 +95,15 @@ grid?.addEventListener("grid-change", () => {
   grid?.setResolvedCounts(new Map());
 });
 
+// Eval button — manually re-resolve the grid
+document.addEventListener("header-eval", () => {
+  if (!grid) return;
+  const words = grid.getWords();
+  resolve(words)
+    .then(applyResolved)
+    .catch((err) => console.error("Failed to resolve grid:", err));
+});
+
 // Clear button
 document.addEventListener("header-clear", () => {
   grid?.clear();

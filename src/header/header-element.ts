@@ -65,20 +65,25 @@ export class HeaderElement extends HTMLElement {
   private renderUI() {
     render(
       html`
-        <button class="header-btn" type="button" @click=${this.onPlayStopClick}>${this.playing ? "Stop" : "Play"}</button>
-        <span class="header-divider"></span>
-        <button class="header-btn" type="button" @click=${this.onAutoClick}>Auto: ${this.autoMode ? "ON" : "OFF"}</button>
-        <div class="wpm-group">
+        <div class="header-title">CyberMUSE</div>
+        <div class="header-actions">
+          <button class="header-btn ${this.playing ? "active" : ""}" type="button" @click=${this.onPlayStopClick}>Loop: ${this.playing ? "ON" : "OFF"}</button>
           <span class="header-divider"></span>
-          <input class="wpm-input" type="number" min="1" max="600" .value=${String(this.wpm)} @change=${this.onWpmChange} />
-          <span class="wpm-label">wpm</span>
+          <button class="header-btn ${this.autoMode ? "active" : ""}" type="button" @click=${this.onAutoClick}>AI: ${this.autoMode ? "ON" : "OFF"}</button>
           <span class="header-divider"></span>
+          <button class="header-btn" type="button" @click=${this.onEvalClick}>Update</button>
+          <div class="wpm-group">
+            <span class="header-divider"></span>
+            <input class="wpm-input" type="number" min="1" max="600" .value=${String(this.wpm)} @change=${this.onWpmChange} />
+            <span class="wpm-label">wpm</span>
+            <span class="header-divider"></span>
+          </div>
+          <button class="header-btn" type="button" @click=${this.onSettingsClick}>Settings</button>
+          <span class="header-divider"></span>
+          <button class="header-btn" type="button" @click=${this.onClearClick}>Clear</button>
+          <span class="header-divider"></span>
+          <button class="header-btn" type="button" @click=${this.onHelpClick}>Help</button>
         </div>
-        <button class="header-btn" type="button" @click=${this.onSettingsClick}>Settings</button>
-        <span class="header-divider"></span>
-        <button class="header-btn" type="button" @click=${this.onHelpClick}>Help</button>
-        <span class="header-divider"></span>
-        <button class="header-btn" type="button" @click=${this.onClearClick}>Clear</button>
       `,
       this
     );
@@ -151,6 +156,14 @@ export class HeaderElement extends HTMLElement {
 
   private onClearClick = () => {
     this.dispatchEvent(new CustomEvent("header-clear", { bubbles: true, composed: true }));
+  };
+
+  /* ---------------------------------------------------------------- */
+  /*  Eval (re-resolve)                                               */
+  /* ---------------------------------------------------------------- */
+
+  private onEvalClick = () => {
+    this.dispatchEvent(new CustomEvent("header-eval", { bubbles: true, composed: true }));
   };
 
   /* ---------------------------------------------------------------- */

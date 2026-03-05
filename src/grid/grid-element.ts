@@ -33,10 +33,19 @@ const posOptions = [
 ];
 const countOptions = ["", "2", "4", "8"];
 
+/** Column tooltip labels. */
+const columnTooltips: Record<number, string> = {
+  0: "syllable 1",
+  1: "syllable 2",
+  2: "syllable 3",
+  [MAX_SYLLABLES]: "rhyme group",
+  [MAX_SYLLABLES + 1]: "word",
+  [MAX_SYLLABLES + 2]: "part of speech",
+  [MAX_SYLLABLES + 3]: "pattern count",
+};
+
 /** Gruvbox bright palette for rhyme group border colors. */
-const rhymeGroupColors: Record<string, string> = Object.fromEntries(
-  letterOptions.filter((l) => l).map((l) => [l, `var(--rhyme-group-${l.toLowerCase()})`]),
-);
+const rhymeGroupColors: Record<string, string> = Object.fromEntries(letterOptions.filter((l) => l).map((l) => [l, `var(--rhyme-group-${l.toLowerCase()})`]));
 
 export interface GridWord {
   index: number; // zero based, start from first non-blank row
@@ -118,13 +127,7 @@ export class GridElement extends HTMLElement {
 
   private renderGrid() {
     const template = html`
-      <form
-        class="board"
-        @click=${this.onFormClick}
-        @input=${this.onFormInput}
-        @keydown=${this.onFormKeyDown}
-        @submit=${preventDefault}
-      >
+      <form class="board" @click=${this.onFormClick} @input=${this.onFormInput} @keydown=${this.onFormKeyDown} @submit=${preventDefault}>
         ${repeat(
           this.cells,
           (_row, rowIndex) => rowIndex,
@@ -142,20 +145,20 @@ export class GridElement extends HTMLElement {
                   ${repeat(
                     row.slice(0, MAX_SYLLABLES + 1),
                     (_cell, colIndex) => colIndex,
-                    (cell, colIndex) => this.renderCell(cell, rowIndex, colIndex),
+                    (cell, colIndex) => this.renderCell(cell, rowIndex, colIndex)
                   )}
                 </div>
                 <div class="row-right">
                   ${repeat(
                     row.slice(MAX_SYLLABLES + 1),
                     (_cell, colOffset) => MAX_SYLLABLES + 1 + colOffset,
-                    (cell, colOffset) => this.renderCell(cell, rowIndex, MAX_SYLLABLES + 1 + colOffset),
+                    (cell, colOffset) => this.renderCell(cell, rowIndex, MAX_SYLLABLES + 1 + colOffset)
                   )}
                   <span class="cell resolved-count" data-blank=${count === undefined}>${count ?? nothing}</span>
                 </div>
               </div>
             `;
-          },
+          }
         )}
       </form>
     `;
@@ -169,10 +172,12 @@ export class GridElement extends HTMLElement {
     if (cell.kind === "cycle") {
       const label = cell.override ?? cell.options[cell.index] ?? "";
       const isPos = col === MAX_SYLLABLES + 2;
+      const tooltip = columnTooltips[col] ?? "";
       return html`
         <button
           class="cell ${isPos ? "pos" : ""} ${isAiEditing ? "ai-editing" : ""}"
           type="button"
+          title=${tooltip}
           data-blank=${label === ""}
           data-row=${row}
           data-col=${col}
@@ -186,11 +191,13 @@ export class GridElement extends HTMLElement {
     const isFocused = row === this.focusedRow;
     const showSampled = isHighlighted && !isFocused && !!this.highlightedWord;
     const displayValue = showSampled ? this.highlightedWord! : cell.value;
+    const tooltip = columnTooltips[col] ?? "";
 
     return html`
       <input
         class="cell text ${isHighlighted ? "highlighted" : ""} ${isAiEditing ? "ai-editing" : ""}"
         type="text"
+        title=${tooltip}
         placeholder=${isHighlighted && this.highlightedWord ? this.highlightedWord : ""}
         data-row=${row}
         data-col=${col}
@@ -351,7 +358,7 @@ export class GridElement extends HTMLElement {
           opt
             .toLowerCase()
             .split(" ")
-            .some((word) => word.startsWith(letter)),
+            .some((word) => word.startsWith(letter))
       );
       const matches = [...primary, ...secondary];
       if (matches.length === 0) return;
@@ -498,8 +505,7 @@ export class GridElement extends HTMLElement {
         if (pos) word.pos = pos;
 
         const countCell = row[MAX_SYLLABLES + 3];
-        const countStr =
-          countCell?.kind === "cycle" ? (countCell.override ?? countCell.options[countCell.index] ?? "") : "";
+        const countStr = countCell?.kind === "cycle" ? (countCell.override ?? countCell.options[countCell.index] ?? "") : "";
         if (countStr) word.count = Number(countStr);
       }
 
@@ -523,7 +529,7 @@ export class GridElement extends HTMLElement {
           return stored;
         }
         return { kind: "text", value: cell.value };
-      }),
+      })
     );
   }
 
@@ -713,10 +719,7 @@ export class GridElement extends HTMLElement {
    * Set individual field values on the cells of the given row.
    * Only provided (non‑`undefined`) fields are touched.
    */
-  private setRowFields(
-    rowIdx: number,
-    fields: { syllables?: string; rhymeGroup?: string; text?: string; pos?: string; count?: number },
-  ): void {
+  private setRowFields(rowIdx: number, fields: { syllables?: string; rhymeGroup?: string; text?: string; pos?: string; count?: number }): void {
     const row = this.cells[rowIdx];
     if (!row) return;
 
