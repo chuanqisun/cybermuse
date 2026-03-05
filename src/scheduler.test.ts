@@ -167,6 +167,90 @@ describe("Scheduler", () => {
     expect(seen[2].word).toBe("world");
   });
 
+  it("combines consecutive blanks into a single tick", () => {
+    const seen: Array<{ word: string; blankIndices?: number[] }> = [];
+    const scheduler = new Scheduler({
+      onWord: (w, _idx, blankIndices) => seen.push({ word: w, blankIndices }),
+    });
+
+    // word, blank, blank, blank, word
+    const grid: ResolvedGrid = {
+      words: [
+        { index: 0, blank: false, pool: ["hello"], count: 1 },
+        { index: 1, blank: true, pool: [], count: 0 },
+        { index: 2, blank: true, pool: [], count: 0 },
+        { index: 3, blank: true, pool: [], count: 0 },
+        { index: 4, blank: false, pool: ["world"], count: 1 },
+      ],
+      candidates: [["hello"], [], [], [], ["world"]],
+    };
+    scheduler.setGrid(grid);
+    scheduler.start();
+
+    // 3 ticks × 600 ms = 1800 ms: "hello" → combined blanks → "world"
+    vi.advanceTimersByTime(1800);
+    scheduler.stop();
+
+    expect(seen).toHaveLength(3);
+    expect(seen[0].word).toBe("hello");
+    expect(seen[1].word).toBe("");
+    expect(seen[1].blankIndices).toEqual([1, 2, 3]);
+    expect(seen[2].word).toBe("world");
+  });
+
+  it("passes blankIndices with a single blank", () => {
+    const seen: Array<{ word: string; blankIndices?: number[] }> = [];
+    const scheduler = new Scheduler({
+      onWord: (w, _idx, blankIndices) => seen.push({ word: w, blankIndices }),
+    });
+
+    const grid: ResolvedGrid = {
+      words: [
+        { index: 0, blank: false, pool: ["hello"], count: 1 },
+        { index: 1, blank: true, pool: [], count: 0 },
+        { index: 2, blank: false, pool: ["world"], count: 1 },
+      ],
+      candidates: [["hello"], [], ["world"]],
+    };
+    scheduler.setGrid(grid);
+    scheduler.start();
+
+    // 3 ticks × 600 ms = 1800 ms
+    vi.advanceTimersByTime(1800);
+    scheduler.stop();
+
+    expect(seen).toHaveLength(3);
+    expect(seen[1].word).toBe("");
+    expect(seen[1].blankIndices).toEqual([1]);
+  });
+
+  it("combines consecutive blanks at end of grid", () => {
+    const seen: Array<{ word: string; blankIndices?: number[] }> = [];
+    const scheduler = new Scheduler({
+      onWord: (w, _idx, blankIndices) => seen.push({ word: w, blankIndices }),
+    });
+
+    // word, blank, blank (blanks at the end)
+    const grid: ResolvedGrid = {
+      words: [
+        { index: 0, blank: false, pool: ["hello"], count: 1 },
+        { index: 1, blank: true, pool: [], count: 0 },
+        { index: 2, blank: true, pool: [], count: 0 },
+      ],
+      candidates: [["hello"], [], []],
+    };
+    scheduler.setGrid(grid);
+    scheduler.start();
+
+    vi.advanceTimersByTime(1200); // 2 ticks × 600 ms = 1200 ms
+    scheduler.stop();
+
+    expect(seen).toHaveLength(2);
+    expect(seen[0].word).toBe("hello");
+    expect(seen[1].word).toBe("");
+    expect(seen[1].blankIndices).toEqual([1, 2]);
+  });
+
   describe("peekNext()", () => {
     it("returns the next word and index", () => {
       const scheduler = new Scheduler({ onWord: vi.fn() });

@@ -42,10 +42,10 @@ const synthesizer = new Synthesizer({
 });
 
 const scheduler = new Scheduler({
-  onWord(word, index) {
-    grid?.highlight(index, word || undefined);
-    transcriber.addWord(word);
+  onWord(word, index, blankIndices) {
     if (word) {
+      grid?.highlight(index, word);
+      transcriber.addWord(word);
       // Feed energy into the pitch contour so range widens with complexity
       pitchContour.setEnergy(soundEngine.currentEnergy);
       const rate = pitchContour.next();
@@ -53,9 +53,16 @@ const scheduler = new Scheduler({
       // Sync Warp Core beat to each spoken word
       soundEngine.onWordBeat();
     } else {
-      // Blank row — let the pitch contour breathe
+      // Blank row(s) — highlight all rows in the consecutive group
+      grid?.highlight(blankIndices ?? [index]);
+      // Record each blank separately in the transcript
+      const count = blankIndices?.length ?? 1;
+      for (let i = 0; i < count; i++) {
+        transcriber.addWord("");
+      }
+      // Let the pitch contour breathe
       pitchContour.onPause();
-      // Keep the trance melody playing through blanks
+      // Keep the trance melody playing through blanks (single beat)
       soundEngine.onBlankBeat();
     }
   },
