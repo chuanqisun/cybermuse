@@ -4,7 +4,8 @@
  * In addition to words, it records special labels:
  *   [started]  — when playback begins
  *   [stopped]  — when playback stops
- *   [pause]    — one marker per blank word (consecutive blanks are kept separate)
+ *   [pause]    — one marker per blank word (kept separate in transcript even
+ *               when the scheduler combines consecutive blanks into one beat)
  *
  * Clearing the system should call `reset()` to wipe the transcript.
  * Call `toString()` to retrieve the full transcription as a single string.
