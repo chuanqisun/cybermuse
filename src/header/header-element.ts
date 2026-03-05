@@ -65,31 +65,22 @@ export class HeaderElement extends HTMLElement {
   private renderUI() {
     render(
       html`
-        <button class="header-btn" type="button" @click=${this.onHelpClick}>Help</button>
+        <button class="header-btn" type="button" @click=${this.onPlayStopClick}>${this.playing ? "Stop" : "Play"}</button>
         <span class="header-divider"></span>
-        <button class="header-btn" type="button" @click=${this.onPlayStopClick}>
-          ${this.playing ? "Stop" : "Play"}
-        </button>
-        <button class="header-btn" type="button" @click=${this.onAutoClick}>
-          Auto: ${this.autoMode ? "ON" : "OFF"}
-        </button>
+        <button class="header-btn" type="button" @click=${this.onAutoClick}>Auto: ${this.autoMode ? "ON" : "OFF"}</button>
         <div class="wpm-group">
           <span class="header-divider"></span>
-          <input
-            class="wpm-input"
-            type="number"
-            min="1"
-            max="600"
-            .value=${String(this.wpm)}
-            @change=${this.onWpmChange}
-          />
+          <input class="wpm-input" type="number" min="1" max="600" .value=${String(this.wpm)} @change=${this.onWpmChange} />
           <span class="wpm-label">wpm</span>
           <span class="header-divider"></span>
         </div>
         <button class="header-btn" type="button" @click=${this.onSettingsClick}>Settings</button>
+        <span class="header-divider"></span>
+        <button class="header-btn" type="button" @click=${this.onHelpClick}>Help</button>
+        <span class="header-divider"></span>
         <button class="header-btn" type="button" @click=${this.onClearClick}>Clear</button>
       `,
-      this,
+      this
     );
   }
 
@@ -202,9 +193,7 @@ export class HeaderElement extends HTMLElement {
       if (apiKeyInput) {
         this.settings.geminiApiKey = apiKeyInput.value.trim() || undefined;
       }
-      this.dispatchEvent(
-        new CustomEvent("settings-change", { bubbles: true, composed: true, detail: { ...this.settings } }),
-      );
+      this.dispatchEvent(new CustomEvent("settings-change", { bubbles: true, composed: true, detail: { ...this.settings } }));
       dialog.close();
       dialog.remove();
       this.dialog = undefined;
@@ -228,7 +217,7 @@ export class HeaderElement extends HTMLElement {
           <button type="button" @click=${onSave}>Save</button>
         </div>
       `,
-      dialog,
+      dialog
     );
 
     document.body.appendChild(dialog);
