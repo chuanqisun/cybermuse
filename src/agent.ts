@@ -320,6 +320,7 @@ Respond with structured JSON containing edit operations to modify the poem grid.
         thinkingConfig: {
           thinkingLevel: ThinkingLevel.MINIMAL,
         },
+        temperature: 0.4,
       },
     });
 
