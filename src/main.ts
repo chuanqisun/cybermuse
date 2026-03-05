@@ -59,6 +59,17 @@ const scheduler = new Scheduler({
       soundEngine.onBlankBeat();
     }
   },
+  onBlankGroup(indices) {
+    // Visual: flash all word cells in the consecutive blanks
+    grid?.highlight(indices);
+    // Transcript: keep each pause separate
+    for (const _idx of indices) {
+      transcriber.addWord("");
+    }
+    // Audio: single beat for the whole group
+    pitchContour.onPause();
+    soundEngine.onBlankBeat();
+  },
   onLoopEnd() {
     transcriber.lineBreak();
   },

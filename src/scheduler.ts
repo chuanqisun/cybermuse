@@ -12,6 +12,12 @@ export interface SchedulerCallbacks {
   onWord(word: string, wordIndex: number): void;
   /** Called when the cursor wraps back to the start (one full cycle). */
   onLoopEnd?(): void;
+  /**
+   * Called when one or more consecutive blank rows are encountered.
+   * All blanks in the run are consumed in a single tick (one beat).
+   * When provided, `onWord` is NOT called for blank rows.
+   */
+  onBlankGroup?(indices: number[]): void;
 }
 
 /**
@@ -130,10 +136,23 @@ export class Scheduler {
 
     const slot = words[this.cursor];
 
-    // Blank rows are silent rests — highlight but don't sample
+    // Blank rows are silent rests — group consecutive blanks into one beat
     if (slot.blank) {
-      this.callbacks.onWord("", slot.index);
-      this.cursor++;
+      const blankIndices: number[] = [slot.index];
+      let next = this.cursor + 1;
+      while (next < words.length && words[next].blank) {
+        blankIndices.push(words[next].index);
+        next++;
+      }
+      this.cursor = next;
+
+      if (this.callbacks.onBlankGroup) {
+        this.callbacks.onBlankGroup(blankIndices);
+      } else {
+        for (const idx of blankIndices) {
+          this.callbacks.onWord("", idx);
+        }
+      }
       this.scheduleTick(this.stepMs);
       return;
     }
