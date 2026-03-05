@@ -3,6 +3,7 @@ import { Agent, createGeminiGenerator } from "./agent";
 import "./grid/grid-element";
 import { GridElement } from "./grid/grid-element";
 import { HeaderElement } from "./header/header-element";
+import { HelpElement } from "./help/help-element";
 import { PitchContour } from "./pitch-contour";
 import { resolve } from "./resolver";
 import { countCandidates } from "./sampler";
@@ -19,9 +20,11 @@ import { initVoice, stopVoice } from "./voice";
 
 GridElement.define();
 HeaderElement.define();
+HelpElement.define();
 
 const grid = document.querySelector<GridElement>("grid-element");
 const header = document.querySelector<HeaderElement>("header-element");
+const help = new HelpElement();
 const resolvedPattern = new BehaviorSubject<ResolvedGrid | null>(null);
 const transcriber = new Transcriber();
 let playing = false;
@@ -73,6 +76,7 @@ resolvedPattern.subscribe((resolved) => {
 
 if (grid && header) {
   header.setGrid(grid);
+  header.setHelp(help);
 
   // Wire up storage bridge (hydrates grid & header from IndexedDB)
   initStorageBridge(grid, header).catch((err) => console.error("Failed to init storage:", err));
@@ -89,6 +93,15 @@ function applyResolved(resolved: ResolvedGrid) {
 
 grid?.addEventListener("grid-change", () => {
   grid?.setResolvedCounts(new Map());
+});
+
+// Eval button — manually re-resolve the grid
+document.addEventListener("header-eval", () => {
+  if (!grid) return;
+  const words = grid.getWords();
+  resolve(words)
+    .then(applyResolved)
+    .catch((err) => console.error("Failed to resolve grid:", err));
 });
 
 // Clear button

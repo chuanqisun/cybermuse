@@ -3,13 +3,28 @@ header-element {
   top: 0;
   z-index: 10;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5ch;
+  font-size: 12px;
+  align-items: stretch;
+  justify-content: space-between;
   width: 100%;
-  padding: 1ch 2ch;
+  min-height: 4ch;
   background-color: Canvas;
-  border-bottom: 1px solid Field;
+  --border-color: color-mix(in srgb, CanvasText 30%, Canvas 70%);
+  border-bottom: 1px solid var(--border-color);
+
+  .header-title {
+    display: flex;
+    align-items: center;
+    padding: 0 1.5ch;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
 
   .header-btn {
     cursor: pointer;
@@ -18,34 +33,51 @@ header-element {
     font-family: inherit;
     font-size: inherit;
     color: inherit;
+    padding: 0 1.5ch;
     opacity: 0.5;
+    white-space: nowrap;
 
     &:hover {
       opacity: 1;
+      background: CanvasText;
+      color: Canvas;
     }
+
+    &.active {
+      opacity: 1;
+      background: CanvasText;
+      color: Canvas;
+    }
+  }
+
+  .header-divider {
+    width: 1px;
+    align-self: stretch;
+    background: currentColor;
+    color: var(--border-color);
   }
 
   .wpm-group {
     display: flex;
     align-items: center;
-    gap: 0.5ch;
-    opacity: 0.5;
-
-    &:focus-within {
-      opacity: 1;
-    }
+    justify-content: center;
+    gap: 0;
   }
 
   .wpm-input {
     width: 5ch;
+    height: 100%;
     background: none;
     border: none;
-    border-bottom: 1px solid currentColor;
     color: inherit;
     font-family: inherit;
     font-size: inherit;
     text-align: center;
-    -moz-appearance: textfield;
+
+    &:focus,
+    &:hover {
+      opacity: 1;
+    }
 
     &::-webkit-inner-spin-button,
     &::-webkit-outer-spin-button {
@@ -55,23 +87,43 @@ header-element {
   }
 
   .wpm-label {
-    font-size: 0.8em;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    opacity: 0.5;
+    padding-right: 1ch;
   }
 }
 
-/* ------------------------------------------------------------------ */
-/*  Settings dialog                                                   */
-/* ------------------------------------------------------------------ */
-.settings-dialog {
-  &::backdrop {
-    background: rgba(0, 0, 0, 0.6);
-  }
+@media (max-width: 40rem) {
+  header-element {
+    flex-direction: column;
+    align-items: stretch;
 
+    .header-title {
+      justify-content: center;
+      padding-block: 0.5ch;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 3ch 3ch;
+      .header-divider {
+        display: none;
+      }
+
+      .header-btn:last-of-type {
+        position: fixed;
+        top: 0;
+        right: 0;
+        padding-block: 0.5ch;
+      }
+    }
+  }
+}
+
+.settings-dialog {
   .dialog-title {
     margin: 0 0 1.5ch;
-    font-size: 1.1em;
   }
 
   .field {

@@ -1,5 +1,6 @@
 import { html, render } from "lit-html";
 import type { GridElement } from "../grid/grid-element";
+import type { HelpElement } from "../help/help-element";
 import type { StoredSettings } from "../storage";
 import "./header-element.css";
 
@@ -13,6 +14,7 @@ export class HeaderElement extends HTMLElement {
   private playing = false;
   private autoMode = false;
   private grid?: GridElement;
+  private help?: HelpElement;
   private wpm = DEFAULT_WPM;
   private settings: StoredSettings = {};
   private dialog?: HTMLDialogElement;
@@ -28,6 +30,11 @@ export class HeaderElement extends HTMLElement {
   /** Link this header to a grid element it controls. */
   setGrid(grid: GridElement) {
     this.grid = grid;
+  }
+
+  /** Link a help element for the about dialog. */
+  setHelp(help: HelpElement) {
+    this.help = help;
   }
 
   /** Current words-per-minute value. */
@@ -58,28 +65,27 @@ export class HeaderElement extends HTMLElement {
   private renderUI() {
     render(
       html`
-        <button class="header-btn" type="button" @click=${this.onPlayStopClick}>
-          ${this.playing ? "Stop" : "Play"}
-        </button>
-        <button class="header-btn" type="button" @click=${this.onAutoClick}>
-          Auto: ${this.autoMode ? "ON" : "OFF"}
-        </button>
-        <div class="wpm-group">
-          <input
-            class="wpm-input"
-            type="number"
-            min="1"
-            max="600"
-            .value=${String(this.wpm)}
-            @change=${this.onWpmChange}
-          />
-          <span>wpm</span>
+        <div class="header-title">CyberMUSE</div>
+        <div class="header-actions">
+          <button class="header-btn ${this.playing ? "active" : ""}" type="button" @click=${this.onPlayStopClick}>Loop: ${this.playing ? "ON" : "OFF"}</button>
+          <span class="header-divider"></span>
+          <button class="header-btn ${this.autoMode ? "active" : ""}" type="button" @click=${this.onAutoClick}>AI: ${this.autoMode ? "ON" : "OFF"}</button>
+          <span class="header-divider"></span>
+          <button class="header-btn" type="button" @click=${this.onEvalClick}>Update</button>
+          <div class="wpm-group">
+            <span class="header-divider"></span>
+            <input class="wpm-input" type="number" min="1" max="600" .value=${String(this.wpm)} @change=${this.onWpmChange} />
+            <span class="wpm-label">wpm</span>
+            <span class="header-divider"></span>
+          </div>
+          <button class="header-btn" type="button" @click=${this.onSettingsClick}>Settings</button>
+          <span class="header-divider"></span>
+          <button class="header-btn" type="button" @click=${this.onClearClick}>Clear</button>
+          <span class="header-divider"></span>
+          <button class="header-btn" type="button" @click=${this.onHelpClick}>Help</button>
         </div>
-        <button class="header-btn" type="button" @click=${this.onSettingsClick}>Settings</button>
-        <button class="header-btn" type="button">Help</button>
-        <button class="header-btn" type="button" @click=${this.onClearClick}>Clear</button>
       `,
-      this,
+      this
     );
   }
 
@@ -153,6 +159,14 @@ export class HeaderElement extends HTMLElement {
   };
 
   /* ---------------------------------------------------------------- */
+  /*  Eval (re-resolve)                                               */
+  /* ---------------------------------------------------------------- */
+
+  private onEvalClick = () => {
+    this.dispatchEvent(new CustomEvent("header-eval", { bubbles: true, composed: true }));
+  };
+
+  /* ---------------------------------------------------------------- */
   /*  WPM                                                             */
   /* ---------------------------------------------------------------- */
 
@@ -162,6 +176,14 @@ export class HeaderElement extends HTMLElement {
     this.wpm = value;
     input.value = String(value);
     this.dispatchEvent(new CustomEvent("wpm-change", { bubbles: true, composed: true, detail: value }));
+  };
+
+  /* ---------------------------------------------------------------- */
+  /*  Help dialog                                                      */
+  /* ---------------------------------------------------------------- */
+
+  private onHelpClick = () => {
+    this.help?.open();
   };
 
   /* ---------------------------------------------------------------- */
@@ -184,9 +206,7 @@ export class HeaderElement extends HTMLElement {
       if (apiKeyInput) {
         this.settings.geminiApiKey = apiKeyInput.value.trim() || undefined;
       }
-      this.dispatchEvent(
-        new CustomEvent("settings-change", { bubbles: true, composed: true, detail: { ...this.settings } }),
-      );
+      this.dispatchEvent(new CustomEvent("settings-change", { bubbles: true, composed: true, detail: { ...this.settings } }));
       dialog.close();
       dialog.remove();
       this.dialog = undefined;
@@ -210,7 +230,7 @@ export class HeaderElement extends HTMLElement {
           <button type="button" @click=${onSave}>Save</button>
         </div>
       `,
-      dialog,
+      dialog
     );
 
     document.body.appendChild(dialog);
