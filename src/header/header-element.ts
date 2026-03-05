@@ -137,6 +137,10 @@ export class HeaderElement extends HTMLElement {
   /* ---------------------------------------------------------------- */
 
   private onAutoClick = () => {
+    if (!this.autoMode && !this.settings.geminiApiKey) {
+      this.openSettingsDialog();
+      return;
+    }
     this.autoMode = !this.autoMode;
     this.renderUI();
     const event = this.autoMode ? "agent-start" : "agent-stop";
