@@ -5,7 +5,7 @@ import { GridElement } from "./grid/grid-element";
 import { HeaderElement } from "./header/header-element";
 import { HelpElement } from "./help/help-element";
 import { PitchContour } from "./pitch-contour";
-import { resolve } from "./resolver";
+import { resolveViaWorker, setResolveWorkerApiKey } from "./resolve-client";
 import { countCandidates } from "./sampler";
 import { Scheduler } from "./scheduler";
 import { SoundEngine } from "./sound-engine";
@@ -15,7 +15,6 @@ import type { SynthStatus } from "./synthesizer";
 import { Synthesizer } from "./synthesizer";
 import { Transcriber } from "./transcriber";
 import type { ResolvedGrid } from "./types";
-import { initVectors, setGeminiApiKey } from "./vectors";
 import { initVoice, stopVoice } from "./voice";
 
 GridElement.define();
@@ -95,15 +94,11 @@ function applyResolved(resolved: ResolvedGrid) {
   grid?.setResolvedCounts(counts);
 }
 
-grid?.addEventListener("grid-change", () => {
-  grid?.setResolvedCounts(new Map());
-});
-
-// Eval button — manually re-resolve the grid
+// Eval button — manually re-resolve the grid (immediate, human-triggered)
 document.addEventListener("header-eval", () => {
   if (!grid) return;
   const words = grid.getWords();
-  resolve(words)
+  resolveViaWorker(words)
     .then(applyResolved)
     .catch((err) => console.error("Failed to resolve grid:", err));
 });
@@ -119,9 +114,9 @@ document.addEventListener("header-clear", () => {
 function startPlay() {
   if (!grid) return;
 
-  // Always re-evaluate patterns with the latest grid data
+  // Always re-evaluate patterns with the latest grid data (immediate, human-triggered)
   const words = grid.getWords();
-  resolve(words)
+  resolveViaWorker(words)
     .then(applyResolved)
     .catch((err) => console.error("Failed to resolve grid:", err));
 
@@ -175,20 +170,43 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// Initialize voice and vector database (non-blocking)
+// Initialize voice (non-blocking). Vector DB is initialized by the resolve worker.
 initVoice().catch((err) => console.error("Failed to initialize voice:", err));
 
-initVectors().catch((err) => console.error("Failed to initialize vectors:", err));
-
-// Propagate Gemini API key to the vectors module whenever settings load or change.
+// Propagate Gemini API key to the resolve worker whenever settings load or change.
 // This listener is intentionally never removed; it lives for the full page lifetime.
 document.addEventListener("settings-change", ((e: CustomEvent<{ geminiApiKey?: string }>) => {
-  setGeminiApiKey(e.detail.geminiApiKey);
+  setResolveWorkerApiKey(e.detail.geminiApiKey);
 }) as EventListener);
 
 /* ------------------------------------------------------------------ */
-/*  AI Agent                                                          */
+/*  Agent                                                             */
 /* ------------------------------------------------------------------ */
+
+/** Debounce delay for agent-triggered resolves (ms). */
+const AGENT_RESOLVE_DEBOUNCE_MS = 100;
+let agentResolveTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** Schedule a debounced resolve after an agent edit. */
+function scheduleAgentResolve() {
+  if (agentResolveTimer !== null) clearTimeout(agentResolveTimer);
+  agentResolveTimer = setTimeout(() => {
+    agentResolveTimer = null;
+    if (!grid) return;
+    const words = grid.getWords();
+    resolveViaWorker(words)
+      .then(applyResolved)
+      .catch((err) => console.error("Agent resolve error:", err));
+  }, AGENT_RESOLVE_DEBOUNCE_MS);
+}
+
+/** Cancel any pending agent resolve. */
+function cancelAgentResolve() {
+  if (agentResolveTimer !== null) {
+    clearTimeout(agentResolveTimer);
+    agentResolveTimer = null;
+  }
+}
 
 let agent: Agent | null = null;
 
@@ -218,11 +236,8 @@ function startAgent() {
       const changed = grid!.blinkEdit(edit);
       grid!.applyEdit(edit);
       if (changed) soundEngine.playEditSound(edit);
-      // Re-evaluate patterns after each agent edit (same as mod-enter)
-      const words = grid!.getWords();
-      resolve(words)
-        .then(applyResolved)
-        .catch((err) => console.error("Agent resolve error:", err));
+      // Debounce resolve after agent edits to avoid rapid-fire re-resolves
+      scheduleAgentResolve();
     },
     onGenerationError: () => {
       soundEngine.playErrorBuzz();
@@ -236,6 +251,7 @@ function startAgent() {
 
 function stopAgent() {
   agent?.stop();
+  cancelAgentResolve();
   soundEngine.stopBackground();
 }
 

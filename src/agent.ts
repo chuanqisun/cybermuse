@@ -234,11 +234,7 @@ export function projectEdits(views: GridLineView[], edits: GridEdit[]): GridLine
 /* ------------------------------------------------------------------ */
 
 /** Function signature for LLM calls. Inject a mock for tests. */
-export type GenerateEdits = (
-  lineViews: GridLineView[],
-  transcript: string,
-  feedback?: GenerationFeedback | null,
-) => Promise<GridEdit[]>;
+export type GenerateEdits = (lineViews: GridLineView[], transcript: string, feedback?: GenerationFeedback | null) => Promise<GridEdit[]>;
 
 /** Create a real Gemini‑backed GenerateEdits function. */
 export function createGeminiGenerator(apiKey: string): GenerateEdits {
@@ -313,7 +309,7 @@ ${manual.trim()}
 </Line numbering rules>
 
 <Poetic voicing>
-- A blank row acts as a silent pause during playback. Use pauses generously to create rhythm, breathing room, and dramatic effect.
+- A blank row acts as a silent pause during playback. Use pauses to create rhythm, breathing room, and dramatic effect. Avoid consecutive pauses.
 - Generally use imbic foot to place stress at the end of the word to create a strong rhythm, but feel free to experiment with different patterns and enjambment.
 - Focus on changing the semantic text. Avoid over manipulating syllable counts, and espacially avoid manipulating the pattern counter unless the word has changed.
 </Poetic voicing>
@@ -338,10 +334,7 @@ Respond with structured JSON containing edit operations to modify the poem grid.
       const parsed = agentResponseSchema.parse(json);
       return parsed.edits;
     } catch (e) {
-      throw new GenerationError(
-        `LLM response failed schema validation: ${e instanceof Error ? e.message : String(e)}`,
-        raw,
-      );
+      throw new GenerationError(`LLM response failed schema validation: ${e instanceof Error ? e.message : String(e)}`, raw);
     }
   };
 }
@@ -432,12 +425,12 @@ export class Agent {
                   // Schedule a retry so the feedback reaches the next call
                   setTimeout(() => needsRefill$.next(), POLL_INTERVAL_MS);
                   return EMPTY;
-                }),
+                })
               );
             }),
             tap((edits) => {
               this.queue.push(...edits);
-            }),
+            })
           );
 
           /* Consumer – decompose edits into per-field operations and
@@ -446,8 +439,7 @@ export class Agent {
             let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
             const scheduleNext = () => {
-              const delay =
-                this.fieldQueue.length > 0 ? randomInt(this.fieldDelayMinMs, this.fieldDelayMaxMs) : POLL_INTERVAL_MS;
+              const delay = this.fieldQueue.length > 0 ? randomInt(this.fieldDelayMinMs, this.fieldDelayMaxMs) : POLL_INTERVAL_MS;
 
               timeoutId = setTimeout(() => {
                 let consumed = false;
@@ -483,7 +475,7 @@ export class Agent {
           });
 
           return merge(producer$, consumer$);
-        }),
+        })
       )
       .subscribe();
   }

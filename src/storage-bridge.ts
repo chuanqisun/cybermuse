@@ -38,7 +38,7 @@ function buildDefaultGrid(): StoredGrid {
     [c(0), c(0), c(0), c(0), t("cybermuse"), c(0), c(0)],
     [c(0), c(0), c(0), c(0), t("loves"), c(0), c(0)],
     [c(0), c(0), c(0), c(RHYME_A), t("romantic"), c(POS_ADJECTIVE), c(COUNT_4)],
-    [c(0), c(0), c(0), c(RHYME_A), t("poem"), c(POS_ADJECTIVE), c(0, "7")],
+    [c(0), c(0), c(0), c(RHYME_B), t("poem"), c(POS_ADJECTIVE), c(0, "7")],
     emptyRow(),
     [c(0), c(0), c(0), c(0), t("it"), c(0), c(0)],
     [c(0), c(0), c(0), c(0), t("sings"), c(0), c(0)],

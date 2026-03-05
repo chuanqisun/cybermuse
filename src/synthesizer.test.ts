@@ -3,12 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Mock the voice module to avoid actual meSpeak dependency
 vi.mock("./voice", () => ({
   generateBuffer: vi.fn(),
-  playBuffer: vi.fn(),
+  playBufferPitched: vi.fn(),
 }));
 
 import { Synthesizer } from "./synthesizer";
 import type { SynthStatusEntry } from "./synthesizer";
-import { generateBuffer, playBuffer } from "./voice";
+import { generateBuffer, playBufferPitched } from "./voice";
 
 let resolvers: Array<(value: ArrayBuffer | null) => void> = [];
 
@@ -74,7 +74,7 @@ describe("Synthesizer", () => {
       const result = synth.playWord("hello");
 
       expect(result).toBe(true);
-      expect(playBuffer).toHaveBeenCalledWith(buffer);
+      expect(playBufferPitched).toHaveBeenCalledWith(buffer, 1.0);
     });
 
     it("returns false when word is not cached", () => {
@@ -82,7 +82,7 @@ describe("Synthesizer", () => {
       const result = synth.playWord("missing");
 
       expect(result).toBe(false);
-      expect(playBuffer).not.toHaveBeenCalled();
+      expect(playBufferPitched).not.toHaveBeenCalled();
     });
   });
 
@@ -206,6 +206,32 @@ describe("Synthesizer", () => {
 
       const last = statuses[statuses.length - 1];
       expect(last).toEqual([]);
+    });
+  });
+
+  describe("status deduplication", () => {
+    it("does not emit status when it has not changed", async () => {
+      // Make synthesis fast: each word resolves immediately
+      vi.mocked(generateBuffer).mockResolvedValue(new ArrayBuffer(8));
+      const onStatusChange = vi.fn();
+      const synth = new Synthesizer({ onStatusChange });
+
+      // Synthesize a slot with 3 words — status should transition from
+      // initial ("synthesizing") to "ready" but NOT fire for every word.
+      await synth.synthesizeGrid([["a", "b", "c"]], [0]);
+
+      // Should have emitted at most: 1 initial + a few intermediate + 1 final.
+      // The key assertion: without dedup, we'd get 1 + 3 = 4 calls.
+      // With dedup, intermediate calls that produce the same status are skipped.
+      const totalCalls = onStatusChange.mock.calls.length;
+      // At minimum, initial + final = 2. Intermediate "synthesizing" calls
+      // that don't change the status should be deduplicated.
+      expect(totalCalls).toBeLessThanOrEqual(3);
+      expect(totalCalls).toBeGreaterThanOrEqual(2);
+
+      // Final status should be "ready"
+      const lastStatus = onStatusChange.mock.calls[totalCalls - 1][0] as SynthStatusEntry[];
+      expect(lastStatus.find((s) => s.slotIndex === 0)?.status).toBe("ready");
     });
   });
 });

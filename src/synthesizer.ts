@@ -27,6 +27,8 @@ export class Synthesizer {
   /** Abort controller for the current synthesis run. */
   private abortController: AbortController | null = null;
   private callbacks: SynthesizerCallbacks;
+  /** Serialised snapshot of the last emitted statuses for deduplication. */
+  private lastEmittedKey = "";
 
   constructor(callbacks: SynthesizerCallbacks) {
     this.callbacks = callbacks;
@@ -150,6 +152,10 @@ export class Synthesizer {
   }
 
   private emitStatus(): void {
-    this.callbacks.onStatusChange(this.getStatuses());
+    const statuses = this.getStatuses();
+    const key = JSON.stringify(statuses);
+    if (key === this.lastEmittedKey) return;
+    this.lastEmittedKey = key;
+    this.callbacks.onStatusChange(statuses);
   }
 }

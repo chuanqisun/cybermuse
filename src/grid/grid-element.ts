@@ -437,12 +437,14 @@ export class GridElement extends HTMLElement {
         break;
       }
     }
-    this.resolvedCounts.clear();
+    const next = new Map<number, number>();
     if (firstNonBlank >= 0) {
       for (const [relIndex, count] of counts) {
-        this.resolvedCounts.set(firstNonBlank + relIndex, count);
+        next.set(firstNonBlank + relIndex, count);
       }
     }
+    if (mapsEqual(this.resolvedCounts, next)) return;
+    this.resolvedCounts = next;
     this.renderGrid();
   }
 
@@ -456,12 +458,14 @@ export class GridElement extends HTMLElement {
         break;
       }
     }
-    this.synthStatuses.clear();
+    const next = new Map<number, SynthStatus>();
     if (firstNonBlank >= 0) {
       for (const [relIndex, status] of statuses) {
-        this.synthStatuses.set(firstNonBlank + relIndex, status);
+        next.set(firstNonBlank + relIndex, status);
       }
     }
+    if (mapsEqual(this.synthStatuses, next)) return;
+    this.synthStatuses = next;
     this.renderGrid();
   }
 
@@ -799,4 +803,13 @@ function clamp(value: number, min: number, max: number): number {
 
 function preventDefault(e: Event) {
   e.preventDefault();
+}
+
+/** Shallow-compare two Maps for equality. */
+function mapsEqual<K, V>(a: Map<K, V>, b: Map<K, V>): boolean {
+  if (a.size !== b.size) return false;
+  for (const [key, value] of a) {
+    if (b.get(key) !== value) return false;
+  }
+  return true;
 }
