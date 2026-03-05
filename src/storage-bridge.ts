@@ -23,19 +23,27 @@ function buildDefaultGrid(): StoredGrid {
   const t = (value: string): StoredCell => ({ kind: "text", value });
   const emptyRow = (): StoredCell[] => [c(0), c(0), c(0), c(0), t(""), c(0), c(0)];
 
-  // posOptions index: adjective=1, noun=12
-  // letterOptions index: A=1, B=2
-  // countOptions index: ""=0, "2"=1, "4"=2, "8"=3; override for non-standard values
+  // Indices into the option arrays defined in grid-element.ts:
+  // letterOptions: A=1, B=2
+  const RHYME_A = 1;
+  const RHYME_B = 2;
+  // posOptions: adjective=1, noun=12
+  const POS_ADJECTIVE = 1;
+  const POS_NOUN = 12;
+  // countOptions: "4"=2, "8"=3; non-standard values (5, 7) use override
+  const COUNT_4 = 2;
+  const COUNT_8 = 3;
+
   return [
-    [c(0), c(0), c(0), c(0), t("cybermuse"), c(0), c(0)],
-    [c(0), c(0), c(0), c(0), t("loves"),     c(0), c(0)],
-    [c(0), c(0), c(0), c(1), t("romantic"),   c(1), c(2)],         // rhyme=A, pos=adjective, count=4
-    [c(0), c(0), c(0), c(1), t("romantic"),   c(1), c(0, "7")],    // rhyme=A, pos=adjective, count=7 (override)
-    emptyRow(),                                                      // blank separator
-    [c(0), c(0), c(0), c(0), t("it"),         c(0), c(0)],
-    [c(0), c(0), c(0), c(0), t("sings"),      c(0), c(0)],
-    [c(0), c(0), c(0), c(1), t(""),           c(1), c(0, "5")],    // blank word, rhyme=A, pos=adjective, count=5
-    [c(0), c(0), c(0), c(2), t(""),           c(12), c(3)],        // blank word, rhyme=B, pos=noun, count=8
+    [c(0), c(0), c(0), c(0),       t("cybermuse"), c(0),            c(0)],
+    [c(0), c(0), c(0), c(0),       t("loves"),     c(0),            c(0)],
+    [c(0), c(0), c(0), c(RHYME_A), t("romantic"),   c(POS_ADJECTIVE), c(COUNT_4)],
+    [c(0), c(0), c(0), c(RHYME_A), t("romantic"),   c(POS_ADJECTIVE), c(0, "7")],
+    emptyRow(),
+    [c(0), c(0), c(0), c(0),       t("it"),         c(0),            c(0)],
+    [c(0), c(0), c(0), c(0),       t("sings"),      c(0),            c(0)],
+    [c(0), c(0), c(0), c(RHYME_A), t(""),           c(POS_ADJECTIVE), c(0, "5")],
+    [c(0), c(0), c(0), c(RHYME_B), t(""),           c(POS_NOUN),     c(COUNT_8)],
   ];
 }
 
