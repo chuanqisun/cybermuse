@@ -187,7 +187,7 @@ describe("Scheduler", () => {
     scheduler.setGrid(grid);
     scheduler.start();
 
-    // 3 ticks: "hello" → combined blanks → "world"
+    // 3 ticks × 600 ms = 1800 ms: "hello" → combined blanks → "world"
     vi.advanceTimersByTime(1800);
     scheduler.stop();
 
@@ -215,6 +215,7 @@ describe("Scheduler", () => {
     scheduler.setGrid(grid);
     scheduler.start();
 
+    // 3 ticks × 600 ms = 1800 ms
     vi.advanceTimersByTime(1800);
     scheduler.stop();
 
@@ -241,7 +242,7 @@ describe("Scheduler", () => {
     scheduler.setGrid(grid);
     scheduler.start();
 
-    vi.advanceTimersByTime(1200); // 2 ticks: "hello" → combined blanks
+    vi.advanceTimersByTime(1200); // 2 ticks × 600 ms = 1200 ms
     scheduler.stop();
 
     expect(seen).toHaveLength(2);

@@ -139,11 +139,13 @@ export class Scheduler {
     // single tick so they produce one beat / one visual flash.
     if (slot.blank) {
       const blankIndices: number[] = [slot.index];
-      while (this.cursor + blankIndices.length < words.length && words[this.cursor + blankIndices.length].blank) {
-        blankIndices.push(words[this.cursor + blankIndices.length].index);
+      let nextIdx = this.cursor + 1;
+      while (nextIdx < words.length && words[nextIdx].blank) {
+        blankIndices.push(words[nextIdx].index);
+        nextIdx++;
       }
       this.callbacks.onWord("", slot.index, blankIndices);
-      this.cursor += blankIndices.length;
+      this.cursor = nextIdx;
       this.scheduleTick(this.stepMs);
       return;
     }
