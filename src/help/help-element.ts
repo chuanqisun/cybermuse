@@ -26,55 +26,76 @@ export class HelpElement extends HTMLElement {
 
     render(
       html`
-        <h2>Cybermuse Poem Pattern Manual</h2>
-        <p>
-          A poem is programmed as a sequence of <strong>slots</strong>. Each slot produces one spoken word. You control
-          word selection by setting constraints on five dimensions: <strong>syllable stress</strong>,
-          <strong>rhyme group</strong>, <strong>text</strong>, <strong>part of speech</strong>, and
-          <strong>count</strong>.
-        </p>
-        <p>A blank slot (all fields empty) acts as a rest — a silent pause in the poem.</p>
-
-        <section>
-          <h3>Syllable Stress</h3>
-          <p>Each word carries a stress pattern — a string of digits, one per syllable:</p>
+        <div class="help-content">
+          <h2>Quick Start</h2>
+          <p>
+            CyberMUSE lets you live-code a poem. Each row in the grid is a <strong>slot</strong> that produces one spoken word. Press <strong>Loop</strong> to
+            hear it, or turn on <strong>AI</strong> to let a Gemini agent compose for you.
+          </p>
           <table>
             <tr>
-              <th>Digit</th>
-              <th>Meaning</th>
+              <th>Control</th>
+              <th>Description</th>
             </tr>
             <tr>
-              <td><code>0</code></td>
-              <td>Unstressed syllable</td>
+              <td>Loop</td>
+              <td>Start or stop the poem loop. Each cycle reads every row and speaks the resolved word.</td>
             </tr>
             <tr>
-              <td><code>1</code></td>
-              <td>Primary stress</td>
+              <td>AI</td>
+              <td>Toggle AI composition mode. The agent fills and edits slots automatically. Requires a Gemini API key (see Settings).</td>
             </tr>
             <tr>
-              <td><code>2</code></td>
-              <td>Secondary stress</td>
+              <td>Update</td>
+              <td>
+                Re‑evaluate all pattern constraints with the current grid data (same as pressing <span class="nowrap"><kbd>Ctrl</kbd>&nbsp;/&nbsp;<kbd>⌘</kbd>&nbsp;+&nbsp;<kbd>Enter</kbd></span>
+                  >Enter</kbd
+                >
+                while playing).
+              </td>
+            </tr>
+            <tr>
+              <td>WPM</td>
+              <td>Words per minute — controls playback speed (1–600).</td>
+            </tr>
+            <tr>
+              <td>Settings</td>
+              <td>Configure your Gemini API key. Only needed for AI mode.</td>
+            </tr>
+            <tr>
+              <td>Clear</td>
+              <td>Reset the entire grid to a blank state.</td>
+            </tr>
+            <tr>
+              <td>Help</td>
+              <td>Opens this dialog.</td>
             </tr>
           </table>
+
+          <table>
+            <tr>
+              <th>Shortcut</th>
+              <th>Action</th>
+            </tr>
+            <tr>
+              <td><span class="nowrap"></span><kbd>Ctrl</kbd>&nbsp;/&nbsp;<kbd>⌘</kbd>&nbsp;+&nbsp;<kbd>Enter</kbd></span></td>
+              <td>Start playback / re‑evaluate patterns while playing.</td>
+            </tr>
+            <tr>
+              <td><span class="nowrap"><kbd>Ctrl</kbd>&nbsp;/&nbsp;<kbd>⌘</kbd>&nbsp;+&nbsp;<kbd>Shift</kbd>&nbsp;+&nbsp;<kbd>Enter</kbd></span></td>
+              <td>Stop playback.</td>
+            </tr>
+          </table>
+
+          <h2>Voicing</h2>
+          <p>A poem is a sequence of slots. Each slot produces one spoken word. A blank row (all fields empty) acts as a silent rest.</p>
+
+          <h3>Syllable Stress</h3>
           <p>
-            A slot has up to three syllable cells. Each cell is blank or one of <code>0</code>, <code>1</code>,
-            <code>2</code>, <code>.</code> (wildcard). Cells concatenate left-to-right into a pattern string.
+            Each word carries a stress pattern — a string of digits, one per syllable. A slot has up to three syllable cells. Each cell is blank or one of
+            <code>0</code> (unstressed), <code>1</code> (primary stress), <code>2</code> (secondary stress), or <code>.</code> (matches zero or more
+            syllables of any stress). Cells concatenate left-to-right.
           </p>
-
-          <h4>Matching</h4>
-          <ul>
-            <li><strong>Blank</strong> — no stress constraint; any word is allowed.</li>
-            <li>
-              <strong>Exact digits</strong> (e.g. <code>01</code>, <code>102</code>) — only words whose stress pattern
-              matches exactly.
-            </li>
-            <li>
-              <strong>Wildcard <code>.</code></strong> — matches zero or more syllables of any stress (converted to
-              regex <code>[012]*</code>).
-            </li>
-          </ul>
-
-          <h4>Wildcard examples</h4>
           <table>
             <tr>
               <th>Pattern</th>
@@ -101,44 +122,27 @@ export class HelpElement extends HTMLElement {
               <td>Starts stressed, ends unstressed</td>
             </tr>
           </table>
-          <p>If no words match the stress pattern, the constraint is dropped (fallback).</p>
-        </section>
+          <p>If no words match the stress pattern, the constraint is dropped.</p>
 
-        <section>
-          <h3>Rhyme Group</h3>
+          <h3>Rhyme Groups</h3>
           <p>
-            Slots can be assigned to a rhyme group <code>A</code>–<code>G</code>. All slots in the same group are
-            constrained to rhyme with each other.
+            Assign slots to a rhyme group (<code>A</code>–<code>G</code>). All slots in the same group are constrained to rhyme with each other. The first slot
+            in each group with user-entered text anchors the rhyme key. The solver uses progressive suffix relaxation to find the tightest partial rhyme when
+            exact matches are scarce.
           </p>
-          <ul>
-            <li>
-              The <strong>first slot</strong> in each group with user-entered text determines the rhyme key (via
-              phoneme lookup).
-            </li>
-            <li>
-              The solver uses <strong>progressive suffix relaxation</strong> — it starts with the full rhyme key and
-              drops leading phonemes until enough candidates match.
-            </li>
-          </ul>
-        </section>
 
-        <section>
-          <h3>Text — Literal &amp; Semantic Search</h3>
-          <ul>
-            <li>
-              <strong>Count ≤ 1</strong> (default): text is emitted <strong>verbatim</strong> — the exact word you
-              type.
-            </li>
-            <li>
-              <strong>Count &gt; 1</strong>: text becomes a <strong>semantic query</strong>. Words are ranked by
-              meaning similarity via vector embeddings.
-            </li>
-          </ul>
-        </section>
+          <h2>Word Selection &amp; Patterning</h2>
+          <p>Each slot's text, part of speech, and count fields work together to control which words are eligible to fill it.</p>
 
-        <section>
-          <h3>Parts of Speech</h3>
-          <p>Filter each slot to a specific part of speech:</p>
+          <h3>Text</h3>
+          <p>
+            When count ≤ 1 (default), the text you type is the exact word spoken (literal mode). When count &gt; 1, the text becomes a
+            <strong>semantic query</strong> — the system finds words whose meaning is similar using vector embeddings. Leave text blank with count &gt; 1 to
+            draw from the full dictionary.
+          </p>
+
+          <h3>Part of Speech</h3>
+          <p>Filter candidates to a specific part of speech. Applied before stress and rhyme constraints.</p>
           <table>
             <tr>
               <th>POS</th>
@@ -197,10 +201,8 @@ export class HelpElement extends HTMLElement {
               <td>"oh", "wow"</td>
             </tr>
           </table>
-        </section>
 
-        <section>
-          <h3>Count Control</h3>
+          <h3>Count</h3>
           <table>
             <tr>
               <th>Count</th>
@@ -216,32 +218,14 @@ export class HelpElement extends HTMLElement {
             </tr>
           </table>
           <p>
-            When count &gt; 1 and not enough candidates are found, the solver progressively widens the search (500 →
-            2,000 → 10,000 → full dictionary → random fill).
+            When count &gt; 1 and not enough candidates are found, the solver progressively widens the search.
           </p>
-        </section>
-
-        <section>
-          <h3>Keyboard Shortcuts</h3>
-          <table>
-            <tr>
-              <th>Shortcut</th>
-              <th>Action</th>
-            </tr>
-            <tr>
-              <td><code>Ctrl/⌘ + Enter</code></td>
-              <td>Play / re-evaluate</td>
-            </tr>
-            <tr>
-              <td><code>Ctrl/⌘ + Shift + Enter</code></td>
-              <td>Stop</td>
-            </tr>
-          </table>
-        </section>
-
-        <button class="help-close" type="button" @click=${onClose}>Close</button>
+        </div>
+        <footer class="help-footer">
+          <button class="help-close" type="button" @click=${onClose}>Close</button>
+        </footer>
       `,
-      dialog,
+      dialog
     );
 
     document.body.appendChild(dialog);

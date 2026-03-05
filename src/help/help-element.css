@@ -1,31 +1,22 @@
 .help-dialog {
-  &::backdrop {
-    background: rgba(0, 0, 0, 0.6);
-  }
-
   width: calc(100vw - 4ch);
-  max-width: 80rem;
+  max-width: 80ch;
   color: CanvasText;
   background: Canvas;
   border: 1px solid CanvasText;
   font-family: inherit;
   font-size: inherit;
+  padding: 0;
 
-  h2 {
-    margin: 0 0 1ch;
-    font-size: 1.2em;
-  }
-
-  h3 {
-    margin: 2ch 0 0.5ch;
-    font-size: 1em;
-  }
-
+  h2,
+  h3,
   h4 {
-    margin: 1.5ch 0 0.5ch;
-    font-size: 1em;
-    font-weight: normal;
-    font-style: italic;
+    font-size: inherit;
+    margin-block: 1ch;
+
+    * + & {
+      margin-block-start: 4ch;
+    }
   }
 
   p {
@@ -41,22 +32,15 @@
     border-collapse: collapse;
     margin: 1ch 0;
     font-size: inherit;
+    line-height: 1.5;
   }
 
   th,
   td {
-    border: 1px solid currentColor;
-    padding: 0.25ch 1ch;
+    border: 1px solid color-mix(in srgb, CanvasText 30%, Canvas 70%);
+    padding: 0.5ch 1ch;
+
     text-align: left;
-    opacity: 0.8;
-  }
-
-  th {
-    opacity: 1;
-  }
-
-  code {
-    opacity: 1;
   }
 
   ul {
@@ -68,19 +52,45 @@
     line-height: 1.5;
   }
 
+  kbd {
+    display: inline-block;
+    padding: 0 0.4ch;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 0.85em;
+  }
+
+  .nowrap {
+    white-space: nowrap;
+  }
+
+  .help-content {
+    padding: 2ch;
+  }
+
+  .help-footer {
+    position: sticky;
+    bottom: 0;
+    background: Canvas;
+    border-top: 1px solid color-mix(in srgb, CanvasText 30%, Canvas 70%);
+  }
+
   .help-close {
     cursor: pointer;
     background: none;
-    border: 1px solid currentColor;
+    border: none;
     color: inherit;
     font-family: inherit;
     font-size: inherit;
-    padding: 0.3ch 1.5ch;
-    opacity: 0.7;
-    margin-top: 2ch;
+    white-space: nowrap;
+    display: block;
+    width: 100%;
+    padding: 1ch 2ch;
 
     &:hover {
-      opacity: 1;
+      background: CanvasText;
+      color: Canvas;
     }
   }
 }

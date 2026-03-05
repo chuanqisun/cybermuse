@@ -9,12 +9,12 @@ import { loadGrid, loadSettings, loadWpm, saveGrid, saveSettings, saveWpm } from
  * cybermuse
  * loves
  * romantic  (rhyme=A, pos=adjective, n=4)
- * romantic  (rhyme=A, pos=adjective, n=7)
+ * poem     (rhyme=A, pos=adjective, n=7)
  * (blank separator)
  * it
  * sings
- * (blank)   (rhyme=A, pos=adjective, n=5)
- * (blank)   (rhyme=B, pos=noun, n=8)
+ * (blank)  (rhyme=A, pos=adjective, n=5)
+ * (blank)  (rhyme=B, pos=noun,      n=8)
  *
  * Cell order per row: [syl0, syl1, syl2, rhyme, text, pos, count]
  */
@@ -55,9 +55,13 @@ function buildDefaultGrid(): StoredGrid {
  * Components never import storage directly; they only emit events.
  * This keeps the persistence logic in one place and the UI layer pure.
  */
-export async function initStorageBridge(grid: GridElement, header: HeaderElement): Promise<void> {
+export async function initStorageBridge(grid: GridElement, header: HeaderElement): Promise<{ isFirstVisit: boolean }> {
   // ---- Hydrate from stored state --------------------------------
   const [storedGrid, storedWpm, storedSettings] = await Promise.all([loadGrid(), loadWpm(), loadSettings()]);
+
+  // storedGrid === undefined means the app has never been used (first visit).
+  // storedGrid === [] means the user explicitly cleared the grid.
+  const isFirstVisit = storedGrid === undefined;
 
   if (storedGrid && storedGrid.length > 0) {
     grid.deserialise(storedGrid);
@@ -91,4 +95,6 @@ export async function initStorageBridge(grid: GridElement, header: HeaderElement
   document.addEventListener("settings-change", ((e: CustomEvent<StoredSettings>) => {
     saveSettings(e.detail);
   }) as EventListener);
+
+  return { isFirstVisit };
 }

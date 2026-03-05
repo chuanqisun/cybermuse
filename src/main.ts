@@ -79,7 +79,11 @@ if (grid && header) {
   header.setHelp(help);
 
   // Wire up storage bridge (hydrates grid & header from IndexedDB)
-  initStorageBridge(grid, header).catch((err) => console.error("Failed to init storage:", err));
+  initStorageBridge(grid, header)
+    .then(({ isFirstVisit }) => {
+      if (isFirstVisit) help.open();
+    })
+    .catch((err) => console.error("Failed to init storage:", err));
 }
 
 function applyResolved(resolved: ResolvedGrid) {
