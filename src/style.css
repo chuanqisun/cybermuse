@@ -2,12 +2,17 @@
   color-scheme: dark;
 }
 
+html,
+body {
+  overscroll-behavior-inline: none;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr;
-  gap: 1ch;
+  gap: 2ch;
   flex-direction: column;
   align-items: center;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;

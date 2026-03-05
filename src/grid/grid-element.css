@@ -7,6 +7,8 @@ grid-element {
   --rhyme-group-f: #8ec07c;
   --rhyme-group-g: #fe8019;
 
+  --grid-object-size: 4ch;
+
   :focus:not(:focus-visible) {
     outline: none;
   }
@@ -15,7 +17,7 @@ grid-element {
     outline-offset: -3px;
   }
 
-  padding: 1ch;
+  padding-block-end: 2ch;
 
   button {
     cursor: pointer;
@@ -94,14 +96,14 @@ grid-element {
   }
 
   .cell {
-    width: 4ch;
-    height: 4ch;
+    width: var(--grid-object-size);
+    height: var(--grid-object-size);
     box-sizing: border-box;
   }
 
   .cell.resolved-count {
     width: auto;
-    min-width: 4ch;
+    min-width: var(--grid-object-size);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -155,5 +157,11 @@ grid-element {
     color: Canvas;
     border-color: transparent;
     opacity: 1;
+  }
+}
+
+@media screen and (max-width: 40rem) {
+  grid-element {
+    --grid-object-size: 3ch;
   }
 }
