@@ -198,10 +198,6 @@ export class HeaderElement extends HTMLElement {
     this.openSettingsDialog();
   };
 
-  private onHelpClick = () => {
-    this.openHelpDialog();
-  };
-
   private openSettingsDialog() {
     // Remove any existing dialog
     this.dialog?.remove();

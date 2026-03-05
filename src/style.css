@@ -34,7 +34,3 @@ dialog {
     margin: auto;
   }
 }
-
-body:has(dialog[open]) {
-  overflow: hidden;
-}
